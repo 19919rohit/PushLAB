@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.widget.TextView;
-
 import me.pushy.sdk.Pushy;
 
 public class MainActivity extends Activity {
@@ -15,44 +14,34 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Allow network operations (needed for token generation if not using background thread)
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
+        // Allow network operations on main thread (only for testing)
+        StrictMode.setThreadPolicy(
+                new StrictMode.ThreadPolicy.Builder().permitAll().build()
+        );
 
         textView = new TextView(this);
         textView.setText("Initializing Pushy...");
-        textView.setTextSize(18);
-        textView.setPadding(30, 100, 30, 30);
+        textView.setTextSize(18f);
+        textView.setPadding(40, 120, 40, 40);
         setContentView(textView);
 
-        // Initialize Pushy SDK
+        // Start Pushy background listener
         Pushy.listen(this);
 
-        // Fetch and display device token
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // Get the device token (registers with Pushy)
-                    final String deviceToken = Pushy.register(getApplicationContext());
+        // Register in background thread
+        new Thread(() -> {
+            try {
+                String deviceToken = Pushy.register(getApplicationContext());
 
-                    // Show it on screen
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            textView.setText("✅ Pushy Device Token:\n\n" + deviceToken);
-                        }
-                    });
-
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            textView.setText("❌ Error registering device:\n" + e.getMessage());
-                        }
-                    });
-                }
+                runOnUiThread(() ->
+                        textView.setText("✅ Pushy Device Token:\n\n" + deviceToken)
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() ->
+                        textView.setText("❌ Error registering device:\n" + e.getMessage())
+                );
             }
         }).start();
     }
-  }
+                              }
