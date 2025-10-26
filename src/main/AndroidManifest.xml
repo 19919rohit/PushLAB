@@ -16,7 +16,7 @@
     <application
         android:allowBackup="true"
         android:label="PushLAB"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/icon_launcher"
         android:theme="@android:style/Theme.Light.NoTitleBar"
         android:supportsRtl="true">
 
